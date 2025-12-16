@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Base de données pour développement
+  postgres:
+    image: postgres:15-alpine
+    container_name: sample-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sample_dev
+      POSTGRES_USER: sample_user
+      POSTGRES_PASSWORD: sample_pass
+    ports:
+      - "5433:5432"  # Port différent pour éviter conflits
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sample-network
+
+  # Redis pour cache/session (optionnel)
+  redis:
+    image: redis:7-alpine
+    container_name: sample-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Port différent pour éviter conflits
+    networks:
+      - sample-network
+
+  # Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sample-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://sample_user:sample_pass@postgres:5432/sample_dev
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sample-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sample-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:3001/api
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sample-network
+
+volumes:
+  postgres_data:
+
+networks:
+  sample-network:
+    driver: bridge
