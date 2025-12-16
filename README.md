@@ -156,7 +156,7 @@ Le projet inclut un `Jenkinsfile` complet avec :
 ### Configuration Jenkins recommandée
 
 1. **Créer un job Multibranch Pipeline**
-2. **Repository URL** : `https://github.com/votre-user/sample-nodejs-project.git`
+2. **Repository URL** : `https://github.com/pedrokarim/sample-nodejs-project.git`
 3. **Credentials** : `github-credentials`
 4. **Script Path** : `Jenkinsfile`
 

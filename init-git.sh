@@ -53,7 +53,7 @@ echo "2. Ajouter le remote: git remote add origin <url>" | tee /dev/stderr
 echo "3. Pousser: git push -u origin main" | tee /dev/stderr
 echo "" | tee /dev/stderr
 echo "🔗 URL du repository à créer:" | tee /dev/stderr
-echo "   https://github.com/VOTRE-USERNAME/sample-nodejs-project" | tee /dev/stderr
+echo "   https://github.com/pedrokarim/sample-nodejs-project" | tee /dev/stderr
 echo "" | tee /dev/stderr
 echo "📊 Statut du repository:" | tee /dev/stderr
 git status

@@ -16,6 +16,7 @@
     "test:backend": "cd backend && npm test",
     "test:frontend": "cd frontend && npm run test",
     "lint": "npm run lint:backend && npm run lint:frontend",
+    "update-and-push": "./update-and-push.sh",
     "lint:backend": "cd backend && npm run lint",
     "lint:frontend": "cd frontend && npm run lint"
   },
@@ -34,6 +35,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/votre-username/sample-nodejs-project.git"
+    "url": "https://github.com/pedrokarim/sample-nodejs-project.git"
   }
 }
