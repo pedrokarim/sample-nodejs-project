@@ -1,56 +1,61 @@
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+        skipDefaultCheckout(true)
+    }
+
     environment {
-        // Variables d'environnement pour le build
         NODE_VERSION = '18'
         BACKEND_PORT = '3001'
         FRONTEND_PORT = '3000'
     }
 
     stages {
-        stage('Branch Info') {
+        stage('Checkout') {
             steps {
+                cleanWs()
+                checkout scm
+
                 script {
-                    echo "🏷️ Building branch: ${env.BRANCH_NAME}"
-                    echo "📝 Commit: ${env.GIT_COMMIT}"
-                    sh 'git log --oneline -3'
+                    echo "Building branch: ${env.BRANCH_NAME}"
+                    echo "Commit: ${env.GIT_COMMIT}"
                 }
             }
         }
 
-        stage('Setup Environment') {
+        stage('Branch info') {
             steps {
-                script {
-                    // Vérifier la structure du projet
-                    sh 'ls -la'
-                    sh 'pwd'
-
-                    // Vérifier que Node.js est disponible
-                    sh 'node --version'
-                    sh 'npm --version'
-
-                    // Créer un fichier .env pour les tests
-                    writeFile file: '.env.test', text: '''
-                        NODE_ENV=test
-                        BACKEND_PORT=3002
-                        FRONTEND_PORT=3001
-                    '''
-                }
+                sh 'git log --oneline -3'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup environment') {
+            steps {
+                sh 'ls -la'
+                sh 'pwd'
+                sh 'node --version'
+                sh 'npm --version'
+
+                writeFile file: '.env.test', text: '''
+NODE_ENV=test
+BACKEND_PORT=3002
+FRONTEND_PORT=3001
+'''
+            }
+        }
+
+        stage('Install dependencies') {
             parallel {
-                stage('Install Backend') {
+                stage('Install backend') {
                     steps {
                         dir('backend') {
                             sh 'npm install'
                         }
                     }
                 }
-
-                stage('Install Frontend') {
+                stage('Install frontend') {
                     steps {
                         dir('frontend') {
                             sh 'npm install'
@@ -60,17 +65,16 @@ pipeline {
             }
         }
 
-        stage('Lint Code') {
+        stage('Lint code') {
             parallel {
-                stage('Lint Backend') {
+                stage('Lint backend') {
                     steps {
                         dir('backend') {
                             sh 'npm run lint || echo "Linting failed but continuing..."'
                         }
                     }
                 }
-
-                stage('Lint Frontend') {
+                stage('Lint frontend') {
                     steps {
                         dir('frontend') {
                             sh 'npm run lint || echo "Linting failed but continuing..."'
@@ -80,9 +84,9 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Run tests') {
             parallel {
-                stage('Test Backend') {
+                stage('Test backend') {
                     steps {
                         dir('backend') {
                             sh 'npm test'
@@ -103,7 +107,7 @@ pipeline {
                     }
                 }
 
-                stage('Test Frontend') {
+                stage('Test frontend') {
                     steps {
                         dir('frontend') {
                             sh 'npm test'
@@ -125,17 +129,16 @@ pipeline {
             }
         }
 
-        stage('Build Application') {
+        stage('Build application') {
             parallel {
-                stage('Build Backend') {
+                stage('Build backend') {
                     steps {
                         dir('backend') {
                             sh 'npm run build || echo "No build script for backend"'
                         }
                     }
                 }
-
-                stage('Build Frontend') {
+                stage('Build frontend') {
                     steps {
                         dir('frontend') {
                             sh 'npm run build'
@@ -150,35 +153,30 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {
+        stage('Integration tests') {
             steps {
                 script {
-                    // Démarrer le backend pour les tests d'intégration
                     dir('backend') {
                         sh 'npm start &'
-                        sh 'sleep 5' // Attendre que le serveur démarre
+                        sh 'sleep 5'
                     }
 
-                    // Tester les endpoints de l'API
                     sh '''
                         curl -f http://localhost:3001/health || exit 1
                         curl -f http://localhost:3001/api/stats || exit 1
                         curl -f http://localhost:3001/api/items || exit 1
                     '''
 
-                    // Arrêter le serveur de test
                     sh 'pkill -f "node.*server.js" || true'
                 }
             }
         }
 
-        stage('Security Scan') {
+        stage('Security scan') {
             steps {
                 script {
-                    // Scan basique des vulnérabilités
                     sh 'npm audit --audit-level moderate || echo "Security scan completed with warnings"'
 
-                    // Vérifier les fichiers sensibles
                     sh '''
                         if [ -f ".env" ]; then
                             echo "WARNING: .env file found in repository!"
@@ -189,7 +187,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Staging') {
+        stage('Deploy to staging') {
             when {
                 anyOf {
                     branch 'main'
@@ -198,53 +196,37 @@ pipeline {
             }
             steps {
                 script {
-                    echo "🚀 Déploiement en staging..."
-
-                    // Simuler un déploiement
+                    echo "Deploiement en staging..."
                     sh '''
                         echo "Building Docker images..."
-                        # docker build -t sample-app:$BUILD_NUMBER .
-
                         echo "Deploying to staging environment..."
-                        # kubectl apply -f k8s/staging/
-
                         echo "Running smoke tests..."
-                        # curl -f https://staging.example.com/health
                     '''
-
-                    echo "✅ Déploiement staging terminé"
+                    echo "Deploiement staging termine"
                 }
             }
         }
 
-        stage('Deploy to Production') {
-            when {
-                branch 'main'
-            }
+        stage('Deploy to production') {
+            when { branch 'main' }
             steps {
                 script {
-                    // Approbation manuelle pour la prod
                     timeout(time: 15, unit: 'MINUTES') {
-                        input message: '🚀 Déployer en PRODUCTION ?',
-                              ok: '🚀 Deploy to Production',
+                        input message: 'Deployer en PRODUCTION ?',
+                              ok: 'Deploy to Production',
                               submitterParameter: 'APPROVER'
                     }
 
-                    echo "🚀 Déploiement en production par ${env.APPROVER}..."
-
-                    // Simuler un déploiement en prod
+                    echo "Deploiement en production par ${env.APPROVER}..."
                     sh '''
                         echo "Production deployment..."
-                        # docker tag sample-app:$BUILD_NUMBER sample-app:prod
-                        # kubectl apply -f k8s/production/
                     '''
-
-                    echo "✅ Déploiement production terminé"
+                    echo "Deploiement production termine"
                 }
             }
         }
 
-        stage('Post-Deploy Tests') {
+        stage('Post-deploy tests') {
             when {
                 anyOf {
                     branch 'main'
@@ -253,18 +235,12 @@ pipeline {
             }
             steps {
                 script {
-                    echo "🧪 Tests post-déploiement..."
-
-                    // Tests de santé de l'application
+                    echo "Tests post-deploiement..."
                     sh '''
                         echo "Testing application health..."
-                        # curl -f https://app.example.com/health
-
                         echo "Testing critical endpoints..."
-                        # curl -f https://api.example.com/api/stats
                     '''
-
-                    echo "✅ Tests post-déploiement réussis"
+                    echo "Tests post-deploiement reussis"
                 }
             }
         }
@@ -273,25 +249,20 @@ pipeline {
     post {
         always {
             script {
-                // Nettoyer les processus restants
-                sh 'pkill -f "node.*server.js" || true'
+                node {
+                    sh 'pkill -f "node.*server.js" || true'
+                    archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
 
-                // Archiver les logs
-                archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
-
-                // Notifications
-                def status = currentBuild.currentResult ?: 'SUCCESS'
-                def color = status == 'SUCCESS' ? 'good' : 'danger'
-
-                echo "📊 Build ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                    def status = currentBuild.currentResult ?: 'SUCCESS'
+                    echo "Build ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                }
             }
         }
 
         success {
             script {
-                echo '🎉 Pipeline réussi !'
+                echo 'Pipeline reussi !'
 
-                // Tagger le commit en cas de succès sur main
                 if (env.BRANCH_NAME == 'main') {
                     sh '''
                         git tag -a "v${BUILD_NUMBER}" -m "Release version ${BUILD_NUMBER} - Jenkins Build #${BUILD_NUMBER}"
@@ -303,16 +274,13 @@ pipeline {
 
         failure {
             script {
-                echo '❌ Pipeline échoué !'
-
-                // Notifications d'échec
-                // slackSend, email, etc.
+                echo 'Pipeline echoue !'
             }
         }
 
         unstable {
             script {
-                echo '⚠️ Build instable'
+                echo 'Build instable'
             }
         }
     }
