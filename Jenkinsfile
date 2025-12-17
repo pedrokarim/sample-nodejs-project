@@ -9,19 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "${env.BRANCH_NAME ?: 'main'}"]],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/pedrokarim/sample-nodejs-project.git',
-                        credentialsId: 'github-credentials'
-                    ]]
-                ])
-            }
-        }
-
         stage('Setup Environment') {
             steps {
                 script {
