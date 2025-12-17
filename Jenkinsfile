@@ -9,6 +9,29 @@ pipeline {
     }
 
     stages {
+        stage('Verify Git Setup') {
+            steps {
+                script {
+                    // Vérifier que Git est correctement configuré
+                    sh 'git --version'
+                    sh 'git config --list | grep -E "(user|safe)" || echo "Git config OK"'
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/pedrokarim/sample-nodejs-project.git',
+                        credentialsId: 'github-credentials'
+                    ]]
+                ])
+            }
+        }
+
         stage('Setup Environment') {
             steps {
                 script {
