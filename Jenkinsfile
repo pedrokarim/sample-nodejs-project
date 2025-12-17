@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        NODE_VERSION = '18'
+        NODE_VERSION = '20'
         BACKEND_PORT = '3001'
         FRONTEND_PORT = '3000'
     }
@@ -44,6 +44,16 @@ pipeline {
             steps {
                 sh 'ls -la'
                 sh 'pwd'
+
+                // Installer Node.js si nécessaire
+                sh '''
+                    if ! command -v node &> /dev/null; then
+                        echo "Node.js not found, installing..."
+                        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                        apt-get install -y nodejs
+                    fi
+                '''
+
                 sh 'node --version'
                 sh 'npm --version'
 
