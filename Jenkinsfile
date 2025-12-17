@@ -9,21 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Setup Git') {
-            steps {
-                script {
-                    // Configuration Git pour éviter les erreurs "dubious ownership"
-                    sh '''
-                        git config --global --add safe.directory $(pwd)
-                        git config --global init.defaultBranch main
-                        git config --global user.name "Jenkins CI/CD"
-                        git config --global user.email "jenkins@localhost"
-                        echo "Git configuration applied"
-                    '''
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 checkout([
