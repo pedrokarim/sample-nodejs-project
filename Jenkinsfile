@@ -9,26 +9,13 @@ pipeline {
     }
 
     stages {
-        stage('Verify Git Setup') {
+        stage('Branch Info') {
             steps {
                 script {
-                    // Vérifier que Git est correctement configuré
-                    sh 'git --version'
-                    sh 'git config --list | grep -E "(user|safe)" || echo "Git config OK"'
+                    echo "🏷️ Building branch: ${env.BRANCH_NAME}"
+                    echo "📝 Commit: ${env.GIT_COMMIT}"
+                    sh 'git log --oneline -3'
                 }
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: 'main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/pedrokarim/sample-nodejs-project.git',
-                        credentialsId: 'github-credentials'
-                    ]]
-                ])
             }
         }
 
