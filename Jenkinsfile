@@ -15,21 +15,30 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                script {
+                    // Configuration Git pour éviter les erreurs "dubious ownership"
+                    sh '''
+                        git config --global --add safe.directory $(pwd)
+                        git config --global --add safe.directory /var/jenkins_home/jobs/sample-nodejs-project/branches/main/workspace
+                        git config --global --add safe.directory /var/jenkins_home/jobs/sample-nodejs-project/workspace
+                        git config --global init.defaultBranch main
+                        git config --global user.name "Jenkins CI/CD"
+                        git config --global user.email "jenkins@localhost"
+                        echo "Git configuration applied"
+                    '''
+                }
+
                 cleanWs()
                 checkout scm
 
                 script {
                     echo "Building branch: ${env.BRANCH_NAME}"
                     echo "Commit: ${env.GIT_COMMIT}"
+                    sh 'git log --oneline -3'
                 }
             }
         }
 
-        stage('Branch info') {
-            steps {
-                sh 'git log --oneline -3'
-            }
-        }
 
         stage('Setup environment') {
             steps {

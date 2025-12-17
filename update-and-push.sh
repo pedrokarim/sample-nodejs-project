@@ -3,20 +3,20 @@
 # Script pour mettre à jour et pousser les modifications
 # Utilisation: ./update-and-push.sh
 
-echo "🔄 Mise à jour des URLs et push vers GitHub..." | tee /dev/stderr
+echo "🔄 Mise à jour des URLs et push vers GitHub..."
 
 # Vérifier si on est dans le bon répertoire
 if [ ! -f "package.json" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
-    echo "❌ Vous devez exécuter ce script depuis le répertoire sample-nodejs-project" | tee /dev/stderr
+    echo "❌ Vous devez exécuter ce script depuis le répertoire sample-nodejs-project"
     exit 1
 fi
 
 # Ajouter les modifications
-echo "📦 Ajout des modifications..." | tee /dev/stderr
+echo "📦 Ajout des modifications..."
 git add .
 
 # Commit des modifications
-echo "💾 Commit des mises à jour..." | tee /dev_stderr
+echo "💾 Commit des mises à jour..."
 git commit -m "fix: update repository URLs to match GitHub repo
 
 - Update Jenkinsfile repository URL
@@ -25,13 +25,13 @@ git commit -m "fix: update repository URLs to match GitHub repo
 - Update scripts with proper URLs"
 
 # Push vers GitHub
-echo "🚀 Push vers GitHub..." | tee /dev/stderr
+echo "🚀 Push vers GitHub..."
 if git push origin main; then
-    echo "✅ Modifications poussées avec succès !" | tee /dev_stderr
-    echo "" | tee /dev_stderr
-    echo "🌐 Repository GitHub: https://github.com/pedrokarim/sample-nodejs-project" | tee /dev_stderr
-    echo "📊 Actions GitHub: https://github.com/pedrokarim/sample-nodejs-project/actions" | tee /dev_stderr
+    echo "✅ Modifications poussées avec succès !"
+    echo ""
+    echo "🌐 Repository GitHub: https://github.com/pedrokarim/sample-nodejs-project"
+    echo "📊 Actions GitHub: https://github.com/pedrokarim/sample-nodejs-project/actions"
 else
-    echo "❌ Erreur lors du push. Vérifiez vos credentials Git." | tee /dev_stderr
+    echo "❌ Erreur lors du push. Vérifiez vos credentials Git."
     exit 1
 fi
