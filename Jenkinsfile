@@ -230,7 +230,7 @@ FRONTEND_PORT=3001
             when { branch 'main' }
             steps {
                 script {
-                    timeout(time: 15, unit: 'MINUTES') {
+                    timeout(time: 5, unit: 'SECONDS') {
                         input message: 'Deployer en PRODUCTION ?',
                               ok: 'Deploy to Production',
                               submitterParameter: 'APPROVER'
@@ -283,10 +283,13 @@ FRONTEND_PORT=3001
                 echo 'Pipeline reussi !'
 
                 if (env.BRANCH_NAME == 'main') {
-                    sh '''
-                        git tag -a "v${BUILD_NUMBER}" -m "Release version ${BUILD_NUMBER} - Jenkins Build #${BUILD_NUMBER}"
-                        git push origin "v${BUILD_NUMBER}"
-                    '''
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh '''
+                            git config credential.helper '!f() { echo "username=${GIT_USERNAME}"; echo "password=${GIT_PASSWORD}"; }; f'
+                            git tag -a "v${BUILD_NUMBER}" -m "Release version ${BUILD_NUMBER} - Jenkins Build #${BUILD_NUMBER}"
+                            git push origin "v${BUILD_NUMBER}"
+                        '''
+                    }
                 }
             }
         }
