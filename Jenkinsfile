@@ -157,7 +157,6 @@ FRONTEND_PORT=3001
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Nom du SonarQube Scanner dans Jenkins (Manage Jenkins → Global Tool Configuration)
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv('SonarQube') {
                         sh "${scannerHome}/bin/sonar-scanner"
