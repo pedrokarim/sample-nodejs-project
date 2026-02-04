@@ -28,7 +28,7 @@ pipeline {
                     '''
                 }
 
-                cleanWs()
+                // cleanWs() nécessite le plugin "Workspace Cleanup" - retiré pour compatibilité
                 checkout scm
 
                 script {
