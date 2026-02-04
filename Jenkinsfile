@@ -114,14 +114,20 @@ FRONTEND_PORT=3001
                     post {
                         always {
                             junit allowEmptyResults: true, testResults: 'backend/test-results.xml, backend/junit.xml'
-                            publishHTML([
-                                allowMissing: true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: 'backend/coverage/lcov-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Backend Coverage Report'
-                            ])
+                            script {
+                                if (fileExists('backend/coverage/lcov-report/index.html')) {
+                                    publishHTML([
+                                        allowMissing: true,
+                                        alwaysLinkToLastBuild: true,
+                                        keepAll: true,
+                                        reportDir: 'backend/coverage/lcov-report',
+                                        reportFiles: 'index.html',
+                                        reportName: 'Backend Coverage Report'
+                                    ])
+                                } else {
+                                    echo 'Backend coverage report not found (Jest may not output lcov-report), skipping publishHTML'
+                                }
+                            }
                         }
                     }
                 }
