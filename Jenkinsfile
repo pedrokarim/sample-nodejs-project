@@ -158,7 +158,7 @@ FRONTEND_PORT=3001
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv(installationName: 'SonarQube', envOnly: true) {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
@@ -167,8 +167,27 @@ FRONTEND_PORT=3001
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    timeout(time: 2, unit: 'MINUTES') {
+                        script {
+                            waitUntil(initialRecurrencePeriod: 5000) {
+                                def response = sh(
+                                    script: '''curl -s -u "${SONAR_TOKEN}:" "http://sonarqube:9000/api/qualitygates/project_status?projectKey=sample-nodejs-project"''',
+                                    returnStdout: true
+                                ).trim()
+                                def json = readJSON text: response
+                                def status = json.projectStatus.status
+                                echo "Quality Gate: ${status}"
+                                if (status == 'OK') {
+                                    return true
+                                } else if (status == 'ERROR') {
+                                    error "Quality Gate FAILED. Voir : http://sonarqube:9000/dashboard?id=sample-nodejs-project"
+                                }
+                                // NONE = analyse pas encore traitee, on reessaie
+                                return false
+                            }
+                        }
+                    }
                 }
             }
         }
