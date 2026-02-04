@@ -14,8 +14,7 @@ function App() {
 
   // Charger les éléments et collections au démarrage
   useEffect(() => {
-    loadItems();
-    loadCollections();
+    Promise.all([loadItems(), loadCollections()]).finally(() => setLoading(false));
   }, []);
 
   const loadItems = async () => {
