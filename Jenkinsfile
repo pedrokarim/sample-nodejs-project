@@ -230,13 +230,17 @@ FRONTEND_PORT=3001
             when { branch 'main' }
             steps {
                 script {
-                    timeout(time: 5, unit: 'SECONDS') {
-                        input message: 'Deployer en PRODUCTION ?',
-                              ok: 'Deploy to Production',
-                              submitterParameter: 'APPROVER'
-                    }
+                    // NOTE: En production réelle, décommenter le bloc ci-dessous
+                    // pour activer l'approbation manuelle avant le déploiement
+                    //
+                    // timeout(time: 15, unit: 'MINUTES') {
+                    //     input message: 'Deployer en PRODUCTION ?',
+                    //           ok: 'Deploy to Production',
+                    //           submitterParameter: 'APPROVER'
+                    // }
+                    // echo "Deploiement en production par ${env.APPROVER}..."
 
-                    echo "Deploiement en production par ${env.APPROVER}..."
+                    echo "Simulation: deploiement en production..."
                     sh '''
                         echo "Production deployment..."
                     '''
