@@ -158,7 +158,7 @@ FRONTEND_PORT=3001
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv(installationName: 'SonarQube', envOnly: true) {
+                    withSonarQubeEnv('SonarQube') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
