@@ -8,10 +8,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Installer les dépendances
-RUN npm ci && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Copier le code source
 COPY . .
+
+# Définir l'URL de l'API pour le build React
+ENV REACT_APP_API_URL=http://localhost:3001/api
 
 # Build l'application
 RUN npm run build

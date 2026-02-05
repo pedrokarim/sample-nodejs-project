@@ -161,6 +161,8 @@ FRONTEND_PORT=3001
                     withSonarQubeEnv(installationName: 'SonarQube', envOnly: true) {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
+                    // Lien cliquable vers le dashboard SonarQube sur la page du build
+                    currentBuild.description = "<a href='http://sonarqube:9000/dashboard?id=sample-nodejs-project' target='_blank'>SonarQube Dashboard</a>"
                 }
             }
         }
