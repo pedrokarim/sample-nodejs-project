@@ -83,7 +83,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer cet element ?')) return;
+    if (!globalThis.confirm('Supprimer cet element ?')) return;
     try {
       const response = await fetch(`${API_URL}/items/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Erreur lors de la suppression');
@@ -141,7 +141,7 @@ function App() {
   };
 
   const handleCollectionDelete = async (id) => {
-    if (!window.confirm('Supprimer cette collection ?')) return;
+    if (!globalThis.confirm('Supprimer cette collection ?')) return;
     try {
       const response = await fetch(`${API_URL}/collections/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Erreur lors de la suppression de la collection');
